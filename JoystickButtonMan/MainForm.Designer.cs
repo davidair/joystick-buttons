@@ -63,6 +63,10 @@ namespace JoystickButtonMan
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toggleVisibilityToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.groupBoxKeyboardModifiers = new System.Windows.Forms.GroupBox();
+            this.radioButtonCtrl = new System.Windows.Forms.RadioButton();
+            this.radioButtonAlt = new System.Windows.Forms.RadioButton();
+            this.radioButtonNone = new System.Windows.Forms.RadioButton();
             this.tableLayoutPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxRed)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxGreen)).BeginInit();
@@ -71,6 +75,7 @@ namespace JoystickButtonMan
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxBlue)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxWhite)).BeginInit();
             this.contextMenuStrip.SuspendLayout();
+            this.groupBoxKeyboardModifiers.SuspendLayout();
             this.SuspendLayout();
             // 
             // backgroundWorker
@@ -238,27 +243,80 @@ namespace JoystickButtonMan
             // toggleVisibilityToolStripMenuItem
             // 
             this.toggleVisibilityToolStripMenuItem.Name = "toggleVisibilityToolStripMenuItem";
-            this.toggleVisibilityToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.toggleVisibilityToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
             this.toggleVisibilityToolStripMenuItem.Text = "&Toggle Visibility";
             this.toggleVisibilityToolStripMenuItem.Click += new System.EventHandler(this.toggleVisibilityToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
             this.exitToolStripMenuItem.Text = "&Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+            // 
+            // groupBoxKeyboardModifiers
+            // 
+            this.groupBoxKeyboardModifiers.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBoxKeyboardModifiers.BackColor = System.Drawing.Color.Transparent;
+            this.groupBoxKeyboardModifiers.Controls.Add(this.radioButtonCtrl);
+            this.groupBoxKeyboardModifiers.Controls.Add(this.radioButtonAlt);
+            this.groupBoxKeyboardModifiers.Controls.Add(this.radioButtonNone);
+            this.groupBoxKeyboardModifiers.Location = new System.Drawing.Point(12, 191);
+            this.groupBoxKeyboardModifiers.Name = "groupBoxKeyboardModifiers";
+            this.groupBoxKeyboardModifiers.Size = new System.Drawing.Size(973, 45);
+            this.groupBoxKeyboardModifiers.TabIndex = 1;
+            this.groupBoxKeyboardModifiers.TabStop = false;
+            this.groupBoxKeyboardModifiers.Text = "Keyboard Modifiers";
+            // 
+            // radioButtonCtrl
+            // 
+            this.radioButtonCtrl.AutoSize = true;
+            this.radioButtonCtrl.Location = new System.Drawing.Point(63, 19);
+            this.radioButtonCtrl.Name = "radioButtonCtrl";
+            this.radioButtonCtrl.Size = new System.Drawing.Size(40, 17);
+            this.radioButtonCtrl.TabIndex = 2;
+            this.radioButtonCtrl.TabStop = true;
+            this.radioButtonCtrl.Text = "Ctrl";
+            this.radioButtonCtrl.UseVisualStyleBackColor = true;
+            this.radioButtonCtrl.CheckedChanged += new System.EventHandler(this.radioButtonCtrl_CheckedChanged);
+            // 
+            // radioButtonAlt
+            // 
+            this.radioButtonAlt.AutoSize = true;
+            this.radioButtonAlt.Location = new System.Drawing.Point(120, 19);
+            this.radioButtonAlt.Name = "radioButtonAlt";
+            this.radioButtonAlt.Size = new System.Drawing.Size(37, 17);
+            this.radioButtonAlt.TabIndex = 1;
+            this.radioButtonAlt.TabStop = true;
+            this.radioButtonAlt.Text = "Alt";
+            this.radioButtonAlt.UseVisualStyleBackColor = true;
+            this.radioButtonAlt.CheckedChanged += new System.EventHandler(this.radioButtonAlt_CheckedChanged);
+            // 
+            // radioButtonNone
+            // 
+            this.radioButtonNone.AutoSize = true;
+            this.radioButtonNone.Location = new System.Drawing.Point(6, 19);
+            this.radioButtonNone.Name = "radioButtonNone";
+            this.radioButtonNone.Size = new System.Drawing.Size(51, 17);
+            this.radioButtonNone.TabIndex = 0;
+            this.radioButtonNone.TabStop = true;
+            this.radioButtonNone.Text = "None";
+            this.radioButtonNone.UseVisualStyleBackColor = true;
+            this.radioButtonNone.CheckedChanged += new System.EventHandler(this.radioButtonNone_CheckedChanged);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
-            this.ClientSize = new System.Drawing.Size(997, 197);
+            this.ClientSize = new System.Drawing.Size(997, 244);
+            this.Controls.Add(this.groupBoxKeyboardModifiers);
             this.Controls.Add(this.tableLayoutPanel);
             this.Name = "MainForm";
             this.Text = "Joystick Buttons Binding";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
+            this.Load += new System.EventHandler(this.MainForm_Load);
             this.tableLayoutPanel.ResumeLayout(false);
             this.tableLayoutPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxRed)).EndInit();
@@ -268,6 +326,8 @@ namespace JoystickButtonMan
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxBlue)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxWhite)).EndInit();
             this.contextMenuStrip.ResumeLayout(false);
+            this.groupBoxKeyboardModifiers.ResumeLayout(false);
+            this.groupBoxKeyboardModifiers.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -292,6 +352,10 @@ namespace JoystickButtonMan
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem toggleVisibilityToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
+        private System.Windows.Forms.GroupBox groupBoxKeyboardModifiers;
+        private System.Windows.Forms.RadioButton radioButtonCtrl;
+        private System.Windows.Forms.RadioButton radioButtonAlt;
+        private System.Windows.Forms.RadioButton radioButtonNone;
     }
 }
 

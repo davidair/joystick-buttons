@@ -16,6 +16,7 @@ limitations under the License.
 using SharpDX.DirectInput;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading;
@@ -39,20 +40,75 @@ namespace JoystickButtonMan
             Red = 5
         }
 
+        private enum KeyboardModifier
+        {
+            Unknown = -1,
+            None = 1,
+            Alt = 2,
+            Ctrl = 4
+        }
+
         private class ButtonPress
         {
             public Button Button { get; private set; }
             public bool Pressed { get; private set; }
+            public KeyboardModifier KeyboardModifier { get; private set; }
 
-            public ButtonPress(Button button, bool pressed)
+            public ButtonPress(Button button, bool pressed, KeyboardModifier keyboardModifier)
             {
                 this.Button = button;
                 this.Pressed = pressed;
+                this.KeyboardModifier = keyboardModifier;
             }
         }
 
         private Joystick _joystick = null;
+        private Keyboard _keyboard = null;
         private List<TextBox> _commandTextBoxes = new List<TextBox>();
+        private KeyboardModifier _selectedModifier = KeyboardModifier.Unknown;
+        private Dictionary<KeyboardModifier, List<String>> _commands = new Dictionary<KeyboardModifier, List<string>>();
+
+        private void SaveCommandsToSettings(KeyboardModifier modifier, StringCollection commands)
+        {
+            commands.Clear();
+            foreach (string command in _commands[modifier])
+            {
+                commands.Add(command);
+            }
+        }
+        private void LoadCommandsFromSettings(KeyboardModifier modifier, StringCollection commands)
+        {
+            _commands[modifier] = new List<string>();
+            if (commands == null)
+            {
+                return;
+            }
+            foreach (string command in commands)
+            {
+                _commands[modifier].Add(command);
+            }
+        }
+
+        private void SaveCommandsToSelectedModifier()
+        {
+            if (_selectedModifier == KeyboardModifier.Unknown)
+            {
+                return;
+            }
+            _commands[_selectedModifier].Clear();
+            foreach (var commandTextBox in _commandTextBoxes)
+            {
+                _commands[_selectedModifier].Add(commandTextBox.Text);
+            }
+        }
+        private void SetCommandsBasedOnSelectedModifier()
+        {
+            int commandIndex = 0;
+            foreach (string command in _commands[_selectedModifier])
+            {
+                _commandTextBoxes[commandIndex++].Text = command;
+            }
+        }
 
         public MainForm(bool visibleForm)
         {
@@ -64,15 +120,56 @@ namespace JoystickButtonMan
             _commandTextBoxes.Add(textBoxBlue);
             _commandTextBoxes.Add(textBoxOrange);
             _commandTextBoxes.Add(textBoxRed);
-            if (Properties.Settings.Default.Commands != null)
+
+            LoadCommandsFromSettings(KeyboardModifier.None, Properties.Settings.Default.Commands);
+            LoadCommandsFromSettings(KeyboardModifier.Alt, Properties.Settings.Default.AltCommands);
+            LoadCommandsFromSettings(KeyboardModifier.Ctrl, Properties.Settings.Default.CtrlCommands);
+
+            KeyboardModifier modifier = (KeyboardModifier)Properties.Settings.Default.SelectedKeyboardModifier;
+            switch (modifier)
             {
-                int commandIndex = 0;
-                foreach (string command in Properties.Settings.Default.Commands)
-                {
-                    _commandTextBoxes[commandIndex++].Text = command;
-                }
+                case KeyboardModifier.None:
+                    this.radioButtonNone.Checked = true;
+                    break;
+
+                case KeyboardModifier.Alt:
+                    this.radioButtonAlt.Checked = true;
+                    break;
+
+                case KeyboardModifier.Ctrl:
+                    this.radioButtonCtrl.Checked = true;
+                    break;
+
+                default:
+                    this.radioButtonNone.Checked = true;
+                    modifier = KeyboardModifier.None;
+                    break;
             }
+
+            _selectedModifier = modifier;
+            SetCommandsBasedOnSelectedModifier();
+
             InitializeJoystick();
+        }
+
+        KeyboardModifier GetSelectedKeyboardModifier()
+        {
+            if (this.radioButtonNone.Checked)
+            {
+                return KeyboardModifier.None;
+            }
+
+            if (this.radioButtonAlt.Checked)
+            {
+                return KeyboardModifier.Alt;
+            }
+
+            if (this.radioButtonCtrl.Checked)
+            {
+                return KeyboardModifier.Ctrl;
+            }
+
+            return KeyboardModifier.Unknown;
         }
 
         protected override void SetVisibleCore(bool value)
@@ -113,7 +210,19 @@ namespace JoystickButtonMan
                     }
                     if (button != Button.Unknown)
                     {
-                        this.backgroundWorker.ReportProgress(0, new ButtonPress(button, datum.Value == 128));
+                        KeyboardModifier modifier = KeyboardModifier.None;
+                        var keyboardState = _keyboard.GetCurrentState();
+                        // Note: it's possible that both Ctrl and Alt are pressed but we won't support this for now.
+                        // The enum does have provisions for that because Alt and Ctrl can be combined.
+                        if (keyboardState.IsPressed(Key.LeftControl) || keyboardState.IsPressed(Key.RightControl))
+                        {
+                            modifier = KeyboardModifier.Ctrl;
+                        }
+                        else if (keyboardState.IsPressed(Key.LeftAlt) || keyboardState.IsPressed(Key.RightAlt))
+                        {
+                            modifier = KeyboardModifier.Alt;
+                        }
+                        this.backgroundWorker.ReportProgress(0, new ButtonPress(button, datum.Value == 128, modifier));
                     }
                 }
 
@@ -126,7 +235,8 @@ namespace JoystickButtonMan
             ButtonPress buttonPress = (ButtonPress)e.UserState;
             if (buttonPress.Pressed)
             {
-                string command = _commandTextBoxes[(int)buttonPress.Button].Text;
+                var commands = _commands[buttonPress.KeyboardModifier];
+                string command = commands[(int)buttonPress.Button];
                 if (!String.IsNullOrWhiteSpace(command))
                 {
                     Process.Start(command);
@@ -148,19 +258,30 @@ namespace JoystickButtonMan
                     break;
                 }
             }
+            _keyboard = new Keyboard(directInput);
+            _keyboard.Acquire();
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (Properties.Settings.Default.Commands == null)
             {
-                Properties.Settings.Default.Commands = new System.Collections.Specialized.StringCollection();
+                Properties.Settings.Default.Commands = new StringCollection();
             }
-            Properties.Settings.Default.Commands.Clear();
-            foreach (var textbox in _commandTextBoxes)
+            if (Properties.Settings.Default.AltCommands == null)
             {
-                Properties.Settings.Default.Commands.Add(textbox.Text);
+                Properties.Settings.Default.AltCommands = new StringCollection();
             }
+            if (Properties.Settings.Default.CtrlCommands == null)
+            {
+                Properties.Settings.Default.CtrlCommands = new StringCollection();
+            }
+
+            SaveCommandsToSettings(KeyboardModifier.None, Properties.Settings.Default.Commands);
+            SaveCommandsToSettings(KeyboardModifier.Alt, Properties.Settings.Default.AltCommands);
+            SaveCommandsToSettings(KeyboardModifier.Ctrl, Properties.Settings.Default.CtrlCommands);
+
+            Properties.Settings.Default.SelectedKeyboardModifier = (int)GetSelectedKeyboardModifier();
             Properties.Settings.Default.Save();
 
             if (!_allowExit)
@@ -198,6 +319,32 @@ namespace JoystickButtonMan
         {
             _allowExit = true;
             Application.Exit();
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void radioButtonNone_CheckedChanged(object sender, EventArgs e)
+        {
+            SaveCommandsToSelectedModifier();
+            _selectedModifier = KeyboardModifier.None;
+            SetCommandsBasedOnSelectedModifier();
+        }
+
+        private void radioButtonCtrl_CheckedChanged(object sender, EventArgs e)
+        {
+            SaveCommandsToSelectedModifier();
+            _selectedModifier = KeyboardModifier.Ctrl;
+            SetCommandsBasedOnSelectedModifier();
+        }
+
+        private void radioButtonAlt_CheckedChanged(object sender, EventArgs e)
+        {
+            SaveCommandsToSelectedModifier();
+            _selectedModifier = KeyboardModifier.Alt;
+            SetCommandsBasedOnSelectedModifier();
         }
     }
 }
