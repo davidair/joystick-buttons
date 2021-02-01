@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.28307.1169
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JoystickButtonMan", "JoystickButtonMan\JoystickButtonMan.csproj", "{1CEE8103-FD92-41B3-A38B-BA0135BE3C08}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MidiMan", "MidiMan\MidiMan.csproj", "{68BED5EB-1B40-4D63-8715-ED33D32F1284}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{1CEE8103-FD92-41B3-A38B-BA0135BE3C08}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1CEE8103-FD92-41B3-A38B-BA0135BE3C08}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1CEE8103-FD92-41B3-A38B-BA0135BE3C08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68BED5EB-1B40-4D63-8715-ED33D32F1284}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68BED5EB-1B40-4D63-8715-ED33D32F1284}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68BED5EB-1B40-4D63-8715-ED33D32F1284}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68BED5EB-1B40-4D63-8715-ED33D32F1284}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

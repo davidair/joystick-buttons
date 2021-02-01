@@ -15,10 +15,9 @@ limitations under the License.
 */
 
 using System;
-using System.Linq;
 using System.Windows.Forms;
 
-namespace JoystickButtonMan
+namespace MidiMan
 {
     static class Program
     {
@@ -26,11 +25,11 @@ namespace JoystickButtonMan
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main(string[] args)
+        static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm(args.Contains("start-hidden") ? false : true));
+            Application.Run(new MainForm());
         }
     }
 }
